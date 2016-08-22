@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import kale.adapter.CommonRcvAdapter;
@@ -50,7 +51,7 @@ public class RcvHeaderFooterTestActivity extends AppCompatActivity {
         layoutManager2 = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager1);
 
-        data.addAll(DataManager.loadData(getBaseContext()));
+//        data.addAll(DataManager.loadData(getBaseContext()));
 
         CommonRcvAdapter<DemoModel> adapter = new CommonRcvAdapter<DemoModel>(data) {
             @Override
@@ -83,8 +84,13 @@ public class RcvHeaderFooterTestActivity extends AppCompatActivity {
         Button footer = new Button(this);
         footer.setText("footer");
 
-        wrapper.setHeaderView(header);
-        wrapper.setFooterView(footer);
+        TextView textView = new TextView(this);
+        textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        textView.setText("暂无内容");
+
+//        wrapper.setHeaderView(header);
+//        wrapper.setFooterView(footer);
+        wrapper.setEmptyView(textView);
 
         recyclerView.setAdapter(wrapper);
 
@@ -93,21 +99,21 @@ public class RcvHeaderFooterTestActivity extends AppCompatActivity {
             @Deprecated
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                position = position - wrapper.getHeaderCount(); // 写在外面就得判断是否有头部和底部，还不能集中控制事件
-                if (position >= 0) {
-                    Toast.makeText(RcvHeaderFooterTestActivity.this, "pos = " + position, Toast.LENGTH_SHORT).show();
-                    data.remove(position);
-                }
+//                position = position - wrapper.getHeaderCount(); // 写在外面就得判断是否有头部和底部，还不能集中控制事件
+//                if (position >= 0) {
+//                    Toast.makeText(RcvHeaderFooterTestActivity.this, "pos = " + position, Toast.LENGTH_SHORT).show();
+//                    data.remove(position);
+//                }
             }
         }));
 
-        recyclerView.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                data.clear();
-                data.addAll(DataManager.loadData(getBaseContext(), 10));
-            }
-        }, 1000);
+//        recyclerView.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                data.clear();
+//                data.addAll(DataManager.loadData(getBaseContext(), 10));
+//            }
+//        }, 1000);
     }
 
     @Override

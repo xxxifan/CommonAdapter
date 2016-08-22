@@ -22,6 +22,8 @@ public class RcvAdapterWrapper extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public static final int TYPE_FOOTER = 99931;
 
+    public static final int TYPE_EMPTY = 99932;
+
     @Getter
     private RecyclerView.LayoutManager layoutManager;
 
@@ -32,6 +34,9 @@ public class RcvAdapterWrapper extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Getter
     private View footerView = null;
+
+    @Getter
+    private View emptyView = null;
 
     public RcvAdapterWrapper(@NonNull RecyclerView.Adapter adapter, @NonNull RecyclerView.LayoutManager layoutManager) {
         mWrapped = adapter;
@@ -79,14 +84,19 @@ public class RcvAdapterWrapper extends RecyclerView.Adapter<RecyclerView.ViewHol
      */
     @Override
     public int getItemCount() {
-        int offset = 0;
+        int count = 0;
         if (headerView != null) {
-            offset++;
+            count++;
         }
         if (footerView != null) {
-            offset++;
+            count++;
         }
-        return offset + mWrapped.getItemCount();
+        if (count + mWrapped.getItemCount() == 0 && emptyView != null) {
+            count++;
+        } else {
+            count += mWrapped.getItemCount();
+        }
+        return count;
     }
 
     @Override
@@ -95,6 +105,8 @@ public class RcvAdapterWrapper extends RecyclerView.Adapter<RecyclerView.ViewHol
             return TYPE_HEADER;
         } else if (footerView != null && position == getItemCount() - 1) {
             return TYPE_FOOTER;
+        } else if (emptyView != null && position == getItemCount() - 1) {
+            return TYPE_EMPTY;
         } else {
             return mWrapped.getItemViewType(position - getHeaderCount());
         }
@@ -106,6 +118,8 @@ public class RcvAdapterWrapper extends RecyclerView.Adapter<RecyclerView.ViewHol
             return new SimpleViewHolder(headerView);
         } else if (viewType == TYPE_FOOTER) {
             return new SimpleViewHolder(footerView);
+        } else if (viewType == TYPE_EMPTY) {
+            return new SimpleViewHolder(emptyView);
         } else {
             return mWrapped.onCreateViewHolder(parent, viewType);
         }
@@ -118,7 +132,7 @@ public class RcvAdapterWrapper extends RecyclerView.Adapter<RecyclerView.ViewHol
     @SuppressWarnings("unchecked")
     public void onBindViewHolder(final RecyclerView.ViewHolder viewHolder, int position) {
         final int type = getItemViewType(position);
-        if (type != TYPE_HEADER && type != TYPE_FOOTER) {
+        if (type != TYPE_HEADER && type != TYPE_FOOTER && type != TYPE_EMPTY) {
             mWrapped.onBindViewHolder(viewHolder, position - getHeaderCount());
         }
     }
@@ -145,6 +159,11 @@ public class RcvAdapterWrapper extends RecyclerView.Adapter<RecyclerView.ViewHol
     public void setFooterView(@NonNull View footerView) {
         this.footerView = footerView;
         setFullSpan(footerView, layoutManager);
+    }
+
+    public void setEmptyView(@NonNull View emptyView) {
+        this.emptyView = emptyView;
+        setFullSpan(emptyView, layoutManager);
     }
 
     private void setFullSpan(View view, RecyclerView.LayoutManager layoutManager) {
@@ -193,6 +212,9 @@ public class RcvAdapterWrapper extends RecyclerView.Adapter<RecyclerView.ViewHol
         return footerView != null ? 1 : 0;
     }
 
+    public int getEmptyCount() {
+        return emptyView != null ? 1 : 0;
+    }
     /**
      * 设置头和底部的跨列
      */
@@ -201,7 +223,8 @@ public class RcvAdapterWrapper extends RecyclerView.Adapter<RecyclerView.ViewHol
             @Override
             public int getSpanSize(int position) {
                 final int type = adapter.getItemViewType(position);
-                if (type == RcvAdapterWrapper.TYPE_HEADER || type == RcvAdapterWrapper.TYPE_FOOTER) {
+                if (type == RcvAdapterWrapper.TYPE_HEADER || type == RcvAdapterWrapper.TYPE_FOOTER
+                        || type == RcvAdapterWrapper.TYPE_EMPTY) {
                     // 如果是头部和底部，那么就横跨
                     return layoutManager.getSpanCount();
                 } else {
